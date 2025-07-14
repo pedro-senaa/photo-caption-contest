@@ -3,35 +3,34 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Caption', {
+    await queryInterface.createTable('images', {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
       },
-      userId: {
-        type: Sequelize.INTEGER,
+      url: {
+        type: Sequelize.STRING,
         allowNull: false,
-        references: {
-          model: 'User',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
+        unique: true,
       },
-      text: {
-        type: Sequelize.TEXT,
+      createdAt: {
         allowNull: false,
-      }
+        type: Sequelize.DATE,
+      },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
     }, {
-      tablename: 'captions',
+      tableName: 'images',
       timestamps: true,
-      underscored: true
+      underscored: true,
     })
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('captions');
+    await queryInterface.dropTable('images');
   }
 };

@@ -19,6 +19,16 @@ module.exports = (sequelize, DataTypes) => {
         text: {
             type: DataTypes.TEXT,
             allowNull: false,
+        },
+        imageId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'images',
+                key: 'id',
+            },
+            onUpdate: 'CASCADE', 
+            onDelete: 'CASCADE',
         }
     }, {
         tableName: 'captions',
@@ -31,7 +41,13 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: 'userId',
             as: 'user'
         })
-    }
+        
+        Caption.belongsTo(models.Image, {
+            foreignKey: 'imageId',
+            as: 'image'
+        });
+    };
+
 
     return Caption;
 }
