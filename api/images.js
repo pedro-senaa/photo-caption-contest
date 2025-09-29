@@ -34,7 +34,7 @@ imagesRouter.get('', async (req, res, next) => {
 });
 
 
-// gets an image by id, and ALL CAPTIONS
+// gets an image by id, and ALL CAPTIONS related to image
 imagesRouter.get('/:id', async (req, res, next) => {
 
     try {

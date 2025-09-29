@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}))
 
 
-
+// connects do db
 db.sequelize.authenticate()
     .then(() => {
         console.log('Connected to database');

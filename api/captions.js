@@ -2,6 +2,8 @@ const express = require('express');
 const captionsRouter = express.Router();
 const db = require('../models');
 const { isAuthenticated } = require('../middleware/auth');
+const NodeCache = require('node-cache');
+const imageCache = new NodeCache({ stdTTL: 600 })
 
 
 
@@ -9,14 +11,27 @@ const { isAuthenticated } = require('../middleware/auth');
 captionsRouter.param('imageId', async (req, res, next, id) => {
     // tries to get imageData in db
     try {
-        const imageData = await db.Image.findByPk(id)
-        if (!imageData) {
-            // sends error if unsucesful
-            res.status(404).json({ message: 'Image not found' })
+        // tries to find image in cache
+        const imageCacheKey = `image_${id}`
+        const cachedImage = imageCache.get(imageCacheKey)
+
+        // cache hit
+        if (cachedImage) {
+            req.image = cachedImage;
+            return next();
+            // cache no hit
         } else {
-            // stores data in req.image and moves on
-            req.image = imageData;
-            next();
+            // gets data in db
+            const imageData = await db.Image.findByPk(id)
+            // data not found
+            if (!imageData) {
+                return res.status(404).json({ message: 'Image not found!' })
+            } else {
+                // data found. Stores in cache and attaches to req.image and nexts
+                imageCache.set(imageCacheKey, imageData);
+                req.image = imageData
+                return next();
+            }
         }
     } catch (err) {
         // err handling
@@ -35,7 +50,7 @@ captionsRouter.param('imageId', async (req, res, next, id) => {
 // posts caption @ image with imageId given
 captionsRouter.post('/:imageId', isAuthenticated, async (req, res, next) => {
 
-    // 
+    // get stuff
     const imageId = Number(req.params.id)
     const userId = req.user.id
     const { text } = req.body;

@@ -51,7 +51,7 @@ authRouter.post('/register', async (req, res, next) => {
 
 });
 
-// login in endpoint
+// login endpoint
 authRouter.post('/login', async (req, res, next) => {
 
     const { username, password } = req.body;
@@ -77,9 +77,9 @@ authRouter.post('/login', async (req, res, next) => {
         }
         // if code is here, we create token then send it
         const token = jwt.sign(
-            {id: user.id, username: user.username},
+            { id: user.id, username: user.username },
             JWT_SECRET,
-            {expiresIn: '1h'}
+            { expiresIn: '1h' }
         )
         res.status(200).json({
             message: 'Login succesful',
@@ -87,14 +87,19 @@ authRouter.post('/login', async (req, res, next) => {
             user: { id: user.id, username: user.username }
         })
 
-    // error handling
+        // error handling
     } catch (err) {
         console.error(err);
-        return res.status(500).json({error: 'Error login in', err})
+        return res.status(500).json({ error: 'Error login in', err })
     }
 
 
 })
+
+// logout route. I guess destroying the token is left to the front-end? 
+authRouter.post('/logout', (req, res, next) => {
+    res.status(200).json({ message: 'Logout Successful!' })
+});
 
 
 
