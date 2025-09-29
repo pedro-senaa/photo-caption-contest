@@ -39,12 +39,12 @@ module.exports = (sequelize, DataTypes) => {
     Caption.associate = function(models) {
         Caption.belongsTo(models.User, {
             foreignKey: 'userId',
-            as: 'user'
+            as: 'User'
         })
         
         Caption.belongsTo(models.Image, {
             foreignKey: 'imageId',
-            as: 'image'
+            as: 'Image'
         });
     };
 
