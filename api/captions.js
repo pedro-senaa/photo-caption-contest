@@ -1,9 +1,11 @@
 const express = require('express');
 const captionsRouter = express.Router();
-const db = require('../models')
+const db = require('../models');
+const { isAuthenticated } = require('../middleware/auth');
 
 
-// param checker for if imageId is not given
+
+// param checker for if imageId
 captionsRouter.param('imageId', async (req, res, next, id) => {
     // tries to get imageData in db
     try {
@@ -31,25 +33,22 @@ captionsRouter.param('imageId', async (req, res, next, id) => {
 
 
 // posts caption @ image with imageId given
-captionsRouter.post('/:imageId', async (req, res, next) => {
+captionsRouter.post('/:imageId', isAuthenticated, async (req, res, next) => {
 
     // 
     const imageId = Number(req.params.id)
-    const { userId, text } = req.body;
+    const userId = req.user.id
+    const { text } = req.body;
 
-    // sends error if caption is not well writen
+    // sends error if anything is missing
     if (!userId || !text) {
         res.status(400).json({ error: 'userId or text is required' })
     }
 
 
     try {
-        // gets user data and handle missing users
-        const user = await db.User.findByPk(userId);
-        if (!user) {
-            res.status(404).json({ error: 'User not found' })
-        }
-        // creates new captions @ imageId with correct user and sends it 
+        // middleware isAuthenticade handles the user existing 
+        // creates new caption with imageId and userId foreignkeys, and sends caption data 
         const newCaption = await db.Caption.create({
             text: text,
             imageId: imageId,
@@ -58,7 +57,7 @@ captionsRouter.post('/:imageId', async (req, res, next) => {
 
         res.status(200).json({ message: 'Caption created!', caption: newCaption })
 
-    //handles errors
+        //handles errors
     } catch (err) {
         console.log('Error fetching data: ', err)
         res.status(500).json({ message: 'Error retrieving captions', error: err })

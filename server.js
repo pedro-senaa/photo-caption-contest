@@ -4,6 +4,7 @@ const captionsRouter = require('./api/captions');
 const app = express();
 const db = require('./models');
 const authRouter = require('./api/users');
+require('dotenv').config();
 
 
 
