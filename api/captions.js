@@ -2,7 +2,7 @@ const express = require('express');
 const captionsRouter = express.Router();
 const db = require('../models');
 const { isAuthenticated } = require('../middleware/auth');
-const myCache = require('../utils.js/cache');
+const myCache = require('../utils/cache');
 
 
 
@@ -22,7 +22,7 @@ captionsRouter.param('imageId', async (req, res, next, imageId) => {
             // cache no hit
         } else {
             // gets data in db
-            const imageData = await db.Image.findByPk(id)
+            const imageData = await db.Image.findByPk(imageId)
             // data not found
             if (!imageData) {
                 return res.status(404).json({ message: 'Image not found!' })
@@ -57,7 +57,7 @@ captionsRouter.post('/:imageId', isAuthenticated, async (req, res, next) => {
 
     // sends error if anything is missing
     if (!userId || !text) {
-        res.status(400).json({ error: 'userId or text is required' })
+        return res.status(400).json({ error: 'userId or text is required' })
     }
 
 
@@ -72,7 +72,7 @@ captionsRouter.post('/:imageId', isAuthenticated, async (req, res, next) => {
 
         // deletes cached captions (invalidating)
         myCache.del(
-            `captions_for_image_${imageId}`
+            `captions_of_image_${imageId}`
         )
 
 

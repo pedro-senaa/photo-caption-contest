@@ -1,7 +1,7 @@
 const express = require('express');
 const imagesRouter = express.Router();
 const db = require('../models');
-const myCache = require('../utils.js/cache');
+const myCache = require('../utils/cache');
 
 
 // param route for when :id is given
@@ -19,7 +19,7 @@ imagesRouter.param('id', async (req, res, next, id) => {
             // no cache hit. gets, caches it, stores in req.image and moves on
             const imageData = await db.Image.findByPk(id)
             if (!imageData) {
-                res.status(404).json({ message: 'Image not found' })
+                return res.status(404).json({ message: 'Image not found' })
             } else {
                 myCache.set(imageCacheKey, imageData)
                 req.image = imageData;
@@ -28,7 +28,7 @@ imagesRouter.param('id', async (req, res, next, id) => {
         }
     } catch (err) {
         console.log('Error fetching data: ', err);
-        res.status(500).json({ message: 'Error retrieving image', error: err })
+        return res.status(500).json({ message: 'Error retrieving image', error: err })
     }
 
 })
@@ -52,14 +52,14 @@ imagesRouter.get('/:id', async (req, res, next) => {
 
     try {
 
-        const captionsCacheKey = `captions_of_image_${Number(req.body.id)}`
-        let cachedCaptions = myCache.get(captionsCacheKey)
+        const captionsCacheKey = `captions_of_image_${Number(req.params.id)}`
+        let captionsData = myCache.get(captionsCacheKey)
         // no cachehit: creates captionsData and sets in cache
-        if (!cachedCaptions) {
+        if (!captionsData) {
 
             captionsData = await db.Caption.findAll({
                 where: {
-                    userId: req.body.id
+                    imageId: req.params.id
                 }
             })
 
