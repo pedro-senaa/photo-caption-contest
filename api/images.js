@@ -1,17 +1,30 @@
 const express = require('express');
 const imagesRouter = express.Router();
-const db = require('../models')
+const db = require('../models');
+const myCache = require('../utils.js/cache');
+
 
 // param route for when :id is given
 imagesRouter.param('id', async (req, res, next, id) => {
 
     try {
-        const imageData = await db.Image.findByPk(id)
-        if (!imageData) {
-            res.status(404).json({ message: 'Image not found' })
+
+        const imageCacheKey = `image_${id}`
+        const cachedImage = myCache.get(imageCacheKey);
+        // cache hit. stores in req.image and moves on
+        if (cachedImage) {
+            req.image = cachedImage;
+            return next();
         } else {
-            req.image = imageData;
-            next();
+            // no cache hit. gets, caches it, stores in req.image and moves on
+            const imageData = await db.Image.findByPk(id)
+            if (!imageData) {
+                res.status(404).json({ message: 'Image not found' })
+            } else {
+                myCache.set(imageCacheKey, imageData)
+                req.image = imageData;
+                return next();
+            }
         }
     } catch (err) {
         console.log('Error fetching data: ', err);
@@ -39,15 +52,26 @@ imagesRouter.get('/:id', async (req, res, next) => {
 
     try {
 
-        const captionsData = await db.Caption.findAll({
-            where: {
-                userId: req.body.id
-            }
-        })
-        res.status(200).json({ imageData: req.image, captionsData: captionsData })
+        const captionsCacheKey = `captions_of_image_${Number(req.body.id)}`
+        let cachedCaptions = myCache.get(captionsCacheKey)
+        // no cachehit: creates captionsData and sets in cache
+        if (!cachedCaptions) {
+
+            captionsData = await db.Caption.findAll({
+                where: {
+                    userId: req.body.id
+                }
+            })
+
+            myCache.set(captionsCacheKey, captionsData);
+        }
+
+
+        // returns 
+        return res.status(200).json({ imageData: req.image, captionsData: captionsData })
     } catch (err) {
         console.log('Error fetching data: ', err)
-        res.status(500).json({ message: 'Error retrieving captions', error: err })
+        return res.status(500).json({ message: 'Error retrieving captions', error: err })
     }
 
 });

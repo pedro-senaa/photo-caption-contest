@@ -2,18 +2,18 @@ const express = require('express');
 const captionsRouter = express.Router();
 const db = require('../models');
 const { isAuthenticated } = require('../middleware/auth');
-const NodeCache = require('node-cache');
-const imageCache = new NodeCache({ stdTTL: 600 })
+const myCache = require('../utils.js/cache');
+
 
 
 
 // param checker for if imageId
-captionsRouter.param('imageId', async (req, res, next, id) => {
+captionsRouter.param('imageId', async (req, res, next, imageId) => {
     // tries to get imageData in db
     try {
         // tries to find image in cache
-        const imageCacheKey = `image_${id}`
-        const cachedImage = imageCache.get(imageCacheKey)
+        const imageCacheKey = `image_${imageId}`
+        const cachedImage = myCache.get(imageCacheKey)
 
         // cache hit
         if (cachedImage) {
@@ -28,7 +28,7 @@ captionsRouter.param('imageId', async (req, res, next, id) => {
                 return res.status(404).json({ message: 'Image not found!' })
             } else {
                 // data found. Stores in cache and attaches to req.image and nexts
-                imageCache.set(imageCacheKey, imageData);
+                myCache.set(imageCacheKey, imageData);
                 req.image = imageData
                 return next();
             }
@@ -51,7 +51,7 @@ captionsRouter.param('imageId', async (req, res, next, id) => {
 captionsRouter.post('/:imageId', isAuthenticated, async (req, res, next) => {
 
     // get stuff
-    const imageId = Number(req.params.id)
+    const imageId = Number(req.params.imageId)
     const userId = req.user.id
     const { text } = req.body;
 
@@ -70,7 +70,13 @@ captionsRouter.post('/:imageId', isAuthenticated, async (req, res, next) => {
             userId: userId,
         });
 
-        res.status(200).json({ message: 'Caption created!', caption: newCaption })
+        // deletes cached captions (invalidating)
+        myCache.del(
+            `captions_for_image_${imageId}`
+        )
+
+
+        return res.status(200).json({ message: 'Caption created!', caption: newCaption })
 
         //handles errors
     } catch (err) {
