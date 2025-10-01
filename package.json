@@ -1,9 +1,15 @@
 {
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.0.0",
+    "express": "^5.1.0",
+    "js-yaml": "^4.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-cache": "^5.1.2",
     "pg": "^8.16.3",
     "sequelize": "^6.37.7",
     "sequelize-cli": "^6.6.3",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "swagger-ui-express": "^5.0.1"
   }
 }
