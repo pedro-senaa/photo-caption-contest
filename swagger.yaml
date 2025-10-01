@@ -1,0 +1,131 @@
+openapi: '3.0.0'
+info:
+  title: Image Caption API
+  version: '1.0.0'
+  description: A simple API for users to post images and captions.
+
+servers:
+  - url: 'http://localhost:3000'
+    description: Development server
+
+# schemas
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+  # Image schema
+    Image:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        url:
+          type: string
+          example: "https://example.com/image.jpg"
+
+    # Caption Schema
+    Caption:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        text:
+          type: string
+          example: 'An awesome caption'
+        userId:
+          type: integer
+          example: 10 
+        imageId:
+          type: integer
+          example: 3
+
+
+
+
+# paths
+paths:
+  # path for /images endpoint
+  /images:
+    get:
+      summary: Retrieve a list of all images
+      tags:
+        - Images
+      responses:
+        '200':
+          description: A list of all images.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Image'
+  # path for /images/{id}
+  /images/{id}:
+    get:
+      summary: Retrieve one image and ALL of it's captions
+      tags: 
+        - Images
+        - Captions
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: id of the image desired
+          schema:
+            type: integer
+      responses: 
+        '200':
+          description: An object with the image and it's captions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  imageData:
+                    $ref: '#/components/schemas/Image'
+                  captionsData:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/Caption'
+
+
+  # path for /captions/{imageId} endpoint
+  /captions/{imageId}:
+    post:
+      summary: Create a new caption for an image
+      tags:
+        - Captions
+      security:
+        - bearerAuth: [] # This endpoint requires JWT authentication
+      parameters:
+        - in: path
+          name: imageId
+          required: true
+          description: The numeric ID of the image to add a caption to.
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: The content of the caption.
+                  example: "This is a great photo!"
+      responses:
+        '200':
+          description: Caption created successfully.
+        '401':
+          description: Unauthorized, token is missing or invalid.
+        '404':
+          description: Image not found.

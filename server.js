@@ -6,10 +6,20 @@ const db = require('./models');
 const authRouter = require('./api/users');
 require('dotenv').config();
 
+const fs = require('fs');
+const path = require('path');
+const yaml = require('js-yaml');
+const swaggerUi = require('swagger-ui-express')
+
 
 
 const PORT = process.env.PORT || 3000;
 
+// swagger stuff
+const swaggerDocument = yaml.load(
+    fs.readFileSync(path.join(__dirname, './swagger.yaml'), 'utf8')
+);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}))

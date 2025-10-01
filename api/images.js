@@ -39,10 +39,10 @@ imagesRouter.get('', async (req, res, next) => {
     try {
         const imagesData = await db.Image.findAll({});
 
-        res.status(200).json(imagesData);
+        return res.status(200).json(imagesData);
     } catch (err) {
         console.error('Error fecthing data', err);
-        res.status(500).json({ message: 'Error retrieving images', error: err.message })
+        return res.status(500).json({ message: 'Error retrieving images', error: err.message })
     }
 });
 
