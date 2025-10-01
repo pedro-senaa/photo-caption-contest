@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'captions',
         timestamps: true,
-        underscored: true,
+        underscored: false,
     });
 
     Caption.associate = function(models) {

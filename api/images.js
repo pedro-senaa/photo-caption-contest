@@ -59,7 +59,7 @@ imagesRouter.get('/:id', async (req, res, next) => {
 
             captionsData = await db.Caption.findAll({
                 where: {
-                    imageId: req.params.id
+                    imageId: Number(req.params.id)
                 }
             })
 

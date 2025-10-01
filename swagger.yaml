@@ -43,6 +43,39 @@ components:
         imageId:
           type: integer
           example: 3
+    # user schema for responses
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 12
+        username:
+          type: string
+          example: cool_user_67
+    # user schema for request bodies for login/register
+    UserCredentials:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: cool_user_67
+        password:
+          type: string
+          format: password # This tells the UI to hide the text
+          example: neverguesspassword123
+    # schema for login response
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        user:
+          $ref: '#/components/schemas/User'
 
 
 
@@ -129,3 +162,66 @@ paths:
           description: Unauthorized, token is missing or invalid.
         '404':
           description: Image not found.
+  # path for users/register
+  /users/register:
+    post:
+      summary: Register a new userId  
+      tags: 
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredentials'
+      responses: 
+        '400':
+          description: Missing username or password
+
+        '201':
+          description: User registraded!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+        '409':
+          description: Username already taken!      
+
+  # path for login @ /users/login
+  /users/login:
+    post:
+      summary: Login userId
+      tags: 
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredentials'
+      responses:
+        '400':
+          description: Username or password required for login
+        '404':
+          description: User not found
+        '401':
+          description: Invalid password
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+  # logout path
+  /users/logout:
+    post:
+      summary: Logs the user out
+      tags:
+        - Users
+      responses: 
+        '200': 
+          description: Logout successful
+                  
+                  
+
